@@ -14,7 +14,7 @@ local PLUGIN_FILE = [[
 using namespace std::literals;
 
 extern "C" __declspec(dllexport)
-constinit auto SFSEPluginVersion = []() noexcept {
+constinit auto SFSEPlugin_Version = []() noexcept {
     REL::Version ver{ ${PLUGIN_VERSION_MAJOR}, ${PLUGIN_VERSION_MINOR}, ${PLUGIN_VERSION_PATCH} };
     SFSE::PluginVersionData v{};
     v.PluginVersion(ver.pack());
