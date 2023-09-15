@@ -10,7 +10,7 @@ package("commonlibsf")
     add_deps("fmt")
     add_deps("spdlog", { configs = { header_only = false, fmt_external = true } })
 
-    add_syslinks("version", "user32", "shell32", "ole32", "advapi32")
+    add_syslinks("advapi32", "dbghelp", "ole32", "shell32", "user32", "version")
 
     on_load("windows|x64", function(package)
         if package:config("sfse_xbyak") then
