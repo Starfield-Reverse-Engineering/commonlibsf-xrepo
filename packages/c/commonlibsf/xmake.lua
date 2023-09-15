@@ -7,8 +7,7 @@ package("commonlibsf")
 
     add_configs("sfse_xbyak", {description = "Enable trampoline support for Xbyak", default = false, type = "boolean"})
 
-    add_deps("fmt")
-    add_deps("spdlog", { configs = { header_only = false, fmt_external = true } })
+    add_deps("spdlog", { configs = { header_only = false, std_format = true } })
 
     add_syslinks("advapi32", "dbghelp", "ole32", "shell32", "user32", "version")
 
