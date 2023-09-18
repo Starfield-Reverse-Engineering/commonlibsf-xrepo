@@ -95,35 +95,29 @@ rule("plugin")
             PROJECT_VERSION_PATCH = semver.new(project.version() or "0.0.0"):patch(),
         }
 
-        local config_parse = function(str)
-            return str:gsub("(%${([^\n]-)})", function(_, var)
-                local result = config_map[var:trim()]
+        local config_parse = function(a_str)
+            return a_str:gsub("(%${([^\n]-)})", function(_, a_var)
+                local result = config_map[a_var:trim()]
                 if type(result) ~= "string" then
                     result = tostring(result)
                 end
-                assert(result ~= nil, "cannot get variable(%s)", var)
+                assert(result ~= nil, "cannot get variable(%s)", a_var)
                 return result
             end)
         end
 
-        local plugin_file = path.join(config_dir, "plugin.cpp")
-        depend.on_changed(function()
-            local file = io.open(plugin_file, "w")
-            if file then
-                file:write(config_parse(PLUGIN_FILE), "\n")
-                file:close()
-            end
-        end, { dependfile = target:dependfile(plugin_file), files = project.allfiles()})
+        local add_file = function(a_path, a_data)
+            local file_path = path.join(config_dir, a_path)
+            depend.on_changed(function()
+                local file = io.open(file_path, "w")
+                if file then
+                    file:write(config_parse(a_data), "\n")
+                    file:close()
+                end
+            end, { dependfile = target:dependfile(file_path), files = project.allfiles()})
+            target:add("files", file_path)
+        end
 
-        local version_file = path.join(config_dir, "version.rc")
-        depend.on_changed(function()
-            local file = io.open(version_file, "w")
-            if file then
-                file:write(config_parse(VERSION_FILE), "\n")
-                file:close()
-            end
-        end, { dependfile = target:dependfile(version_file), files = project.allfiles()})
-
-        target:add("files", plugin_file)
-        target:add("files", version_file)
+        add_file("plugin.cpp", PLUGIN_FILE)
+        add_file("version.rc", VERSION_FILE)
     end)
