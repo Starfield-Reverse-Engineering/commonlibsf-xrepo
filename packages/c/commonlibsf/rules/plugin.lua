@@ -20,9 +20,8 @@ constinit auto SFSEPlugin_Version = []() noexcept {
     v.PluginVersion(ver.pack());
     v.PluginName("${PLUGIN_NAME}");
     v.AuthorName("${PLUGIN_AUTHOR}");
-    v.UsesSigScanning(true);
+    v.UsesAddressLibrary(true);
     v.HasNoStructUse(true);
-    v.CompatibleVersions({ SFSE::RUNTIME_LATEST });
     return v;
 }();]]
 
