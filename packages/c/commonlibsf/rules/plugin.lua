@@ -21,7 +21,7 @@ constinit auto SFSEPlugin_Version = []() noexcept {
     v.PluginName("${PLUGIN_NAME}");
     v.AuthorName("${PLUGIN_AUTHOR}");
     v.UsesAddressLibrary(true);
-    v.HasNoStructUse(true);
+    v.IsLayoutDependent(true);
     return v;
 }();]]
 
