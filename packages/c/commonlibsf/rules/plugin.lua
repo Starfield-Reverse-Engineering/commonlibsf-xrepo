@@ -15,9 +15,8 @@ using namespace std::literals;
 
 extern "C" __declspec(dllexport)
 constinit auto SFSEPlugin_Version = []() noexcept {
-    REL::Version ver{ ${PLUGIN_VERSION_MAJOR}, ${PLUGIN_VERSION_MINOR}, ${PLUGIN_VERSION_PATCH} };
     SFSE::PluginVersionData v{};
-    v.PluginVersion(ver.pack());
+    v.PluginVersion({ ${PLUGIN_VERSION_MAJOR}, ${PLUGIN_VERSION_MINOR}, ${PLUGIN_VERSION_PATCH} });
     v.PluginName("${PLUGIN_NAME}");
     v.AuthorName("${PLUGIN_AUTHOR}");
     v.UsesAddressLibrary(true);
