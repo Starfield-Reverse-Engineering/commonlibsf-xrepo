@@ -137,10 +137,10 @@ rule("plugin")
         local config_parse = function(a_str)
             return a_str:gsub("(%${([^\n]-)})", function(_, a_var)
                 local result = config_map[a_var:trim()]
+                assert(result ~= nil, "cannot get variable(%s)", a_var)
                 if type(result) ~= "string" then
                     result = tostring(result)
                 end
-                assert(result ~= nil, "cannot get variable(%s)", a_var)
                 return result
             end)
         end
