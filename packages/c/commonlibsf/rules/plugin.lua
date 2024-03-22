@@ -128,10 +128,10 @@ rule("plugin")
             PROJECT_VERSION_MAJOR   = semver.new(project.version() or "0.0.0"):major(),
             PROJECT_VERSION_MINOR   = semver.new(project.version() or "0.0.0"):minor(),
             PROJECT_VERSION_PATCH   = semver.new(project.version() or "0.0.0"):patch(),
-            OPTION_SIG_SCANNING     = tostring(configs.options.sig_scanning),
-            OPTION_ADDRESS_LIBRARY  = tostring(configs.options.address_library),
-            OPTION_NO_STRUCT_USE    = tostring(configs.options.no_struct_use),
-            OPTION_LAYOUT_DEPENDENT = tostring(configs.options.layout_dependent)
+            OPTION_SIG_SCANNING     = configs.options.sig_scanning,
+            OPTION_ADDRESS_LIBRARY  = configs.options.address_library,
+            OPTION_NO_STRUCT_USE    = configs.options.no_struct_use,
+            OPTION_LAYOUT_DEPENDENT = configs.options.layout_dependent
         }
 
         local config_parse = function(a_str)
