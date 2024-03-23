@@ -5,6 +5,11 @@
 --     author = "Author Name",
 --     description = "Plugin Description",
 --     email = "user@site.com"
+--     options = {
+--         -- disable all compatibility checks completely
+--         sig_scanning = true,
+--         no_struct_use = true
+--     }
 -- })
 
 local PLUGIN_FILE = [[
@@ -19,8 +24,10 @@ constinit auto SFSEPlugin_Version = []() noexcept {
     v.PluginVersion({ ${PLUGIN_VERSION_MAJOR}, ${PLUGIN_VERSION_MINOR}, ${PLUGIN_VERSION_PATCH} });
     v.PluginName("${PLUGIN_NAME}");
     v.AuthorName("${PLUGIN_AUTHOR}");
-    v.UsesAddressLibrary(true);
-    v.IsLayoutDependent(true);
+    v.UsesSigScanning(${OPTION_SIG_SCANNING});
+    v.UsesAddressLibrary(${OPTION_ADDRESS_LIBRARY});
+    v.HasNoStructUse(${OPTION_NO_STRUCT_USE});
+    v.IsLayoutDependent(${OPTION_LAYOUT_DEPENDENT});
     return v;
 }();]]
 
@@ -72,34 +79,68 @@ rule("plugin")
         local configs = target:extraconf("rules", "@commonlibsf/plugin")
         local config_dir = path.join(target:autogendir(), "rules", "commonlibsf", "plugin")
 
-        if configs.options == nil then
-            configs.options = {}
+        if configs.options then
+            -- options to locals
+            local signat = configs.options.sig_scanning or false
+            local addlib = configs.options.address_library == nil
+            if not addlib then
+                addlib = configs.options.address_library
+            end
+            local struct = configs.options.no_struct_use or false
+            local layout = configs.options.layout_dependent == nil
+            if not layout then
+                layout = configs.options.layout_dependent
+            end
+            -- locals to options
+            if signat then
+                configs.options.address_library = false
+            else
+                configs.options.sig_scanning = signat
+                configs.options.address_library = addlib
+            end
+            if struct then
+                configs.options.layout_dependent = false
+            else
+                configs.options.no_struct_use = struct
+                configs.options.layout_dependent = layout
+            end
+        else
+            configs.options = {
+                sig_scanning = false,
+                address_library = true,
+                no_struct_use = false,
+                layout_dependent = true
+            }
         end
 
         local config_map = {
-            PLUGIN_AUTHOR         = configs.author or "",
-            PLUGIN_DESCRIPTION    = configs.description or "",
-            PLUGIN_EMAIL          = configs.email or "",
-            PLUGIN_LICENSE        = (target:license() or "Unknown") .. " License",
-            PLUGIN_NAME           = configs.name or target:name(),
-            PLUGIN_VERSION        = target:version() or "0.0.0",
-            PLUGIN_VERSION_MAJOR  = semver.new(target:version() or "0.0.0"):major(),
-            PLUGIN_VERSION_MINOR  = semver.new(target:version() or "0.0.0"):minor(),
-            PLUGIN_VERSION_PATCH  = semver.new(target:version() or "0.0.0"):patch(),
-            PROJECT_NAME          = project.name() or "",
-            PROJECT_VERSION       = project.version() or "0.0.0",
-            PROJECT_VERSION_MAJOR = semver.new(project.version() or "0.0.0"):major(),
-            PROJECT_VERSION_MINOR = semver.new(project.version() or "0.0.0"):minor(),
-            PROJECT_VERSION_PATCH = semver.new(project.version() or "0.0.0"):patch(),
+            PLUGIN_AUTHOR           = configs.author or "",
+            PLUGIN_DESCRIPTION      = configs.description or "",
+            PLUGIN_EMAIL            = configs.email or "",
+            PLUGIN_LICENSE          = (target:license() or "Unknown") .. " License",
+            PLUGIN_NAME             = configs.name or target:name(),
+            PLUGIN_VERSION          = target:version() or "0.0.0",
+            PLUGIN_VERSION_MAJOR    = semver.new(target:version() or "0.0.0"):major(),
+            PLUGIN_VERSION_MINOR    = semver.new(target:version() or "0.0.0"):minor(),
+            PLUGIN_VERSION_PATCH    = semver.new(target:version() or "0.0.0"):patch(),
+            PROJECT_NAME            = project.name() or "",
+            PROJECT_VERSION         = project.version() or "0.0.0",
+            PROJECT_VERSION_MAJOR   = semver.new(project.version() or "0.0.0"):major(),
+            PROJECT_VERSION_MINOR   = semver.new(project.version() or "0.0.0"):minor(),
+            PROJECT_VERSION_PATCH   = semver.new(project.version() or "0.0.0"):patch(),
+            OPTION_SIG_SCANNING     = configs.options.sig_scanning,
+            OPTION_ADDRESS_LIBRARY  = configs.options.address_library,
+            OPTION_NO_STRUCT_USE    = configs.options.no_struct_use,
+            OPTION_LAYOUT_DEPENDENT = configs.options.layout_dependent
         }
 
         local config_parse = function(a_str)
             return a_str:gsub("(%${([^\n]-)})", function(_, a_var)
                 local result = config_map[a_var:trim()]
+                assert(result ~= nil, "cannot get variable(%s)", a_var)
                 if type(result) ~= "string" then
                     result = tostring(result)
                 end
-                assert(result ~= nil, "cannot get variable(%s)", a_var)
                 return result
             end)
         end
