@@ -80,29 +80,21 @@ rule("plugin")
         local config_dir = path.join(target:autogendir(), "rules", "commonlibsf", "plugin")
 
         if configs.options then
-            -- options to locals
-            local signat = configs.options.sig_scanning or false
-            local addlib = configs.options.address_library == nil
-            if not addlib then
-                addlib = configs.options.address_library
-            end
-            local struct = configs.options.no_struct_use or false
-            local layout = configs.options.layout_dependent == nil
-            if not layout then
-                layout = configs.options.layout_dependent
-            end
-            -- locals to options
-            if signat then
+            if configs.options.sig_scanning then
                 configs.options.address_library = false
             else
-                configs.options.sig_scanning = signat
-                configs.options.address_library = addlib
+                configs.options.sig_scanning = false
+                if configs.options.address_library == nil then
+                    configs.options.address_library = true
+                end
             end
-            if struct then
+            if configs.options.no_struct_use then
                 configs.options.layout_dependent = false
             else
-                configs.options.no_struct_use = struct
-                configs.options.layout_dependent = layout
+                configs.options.no_struct_use = false
+                if configs.options.layout_dependent == nil then
+                    configs.options.layout_dependent = true
+                end
             end
         else
             configs.options = {
