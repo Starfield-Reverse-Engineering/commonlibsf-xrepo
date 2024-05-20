@@ -24,6 +24,7 @@ constinit auto SFSEPlugin_Version = []() noexcept {
     v.PluginVersion({ ${PLUGIN_VERSION_MAJOR}, ${PLUGIN_VERSION_MINOR}, ${PLUGIN_VERSION_PATCH} });
     v.PluginName("${PLUGIN_NAME}");
     v.AuthorName("${PLUGIN_AUTHOR}");
+    v.CompatibleVersions(${COMPATIBLE_VERSIONS});
     v.UsesSigScanning(${OPTION_SIG_SCANNING});
     v.UsesAddressLibrary(${OPTION_ADDRESS_LIBRARY});
     v.HasNoStructUse(${OPTION_NO_STRUCT_USE});
@@ -105,25 +106,36 @@ rule("plugin")
             }
         end
 
+        local compatible_versions = {}
+        if configs.compatible_versions then
+            for i, v in ipairs(configs.compatible_versions) do
+                local version = semver.new(v)
+                compatible_versions[i] = string.format("{%s, %s, %s}", version:major(), version:minor(), version:patch())
+            end
+        else
+            compatible_versions = {"{0, 0, 0}"}
+        end
+
         local config_map = {
-            PLUGIN_AUTHOR           = configs.author or "",
-            PLUGIN_DESCRIPTION      = configs.description or "",
-            PLUGIN_EMAIL            = configs.email or "",
-            PLUGIN_LICENSE          = (target:license() or "Unknown") .. " License",
-            PLUGIN_NAME             = configs.name or target:name(),
-            PLUGIN_VERSION          = target:version() or "0.0.0",
-            PLUGIN_VERSION_MAJOR    = semver.new(target:version() or "0.0.0"):major(),
-            PLUGIN_VERSION_MINOR    = semver.new(target:version() or "0.0.0"):minor(),
-            PLUGIN_VERSION_PATCH    = semver.new(target:version() or "0.0.0"):patch(),
-            PROJECT_NAME            = project.name() or "",
-            PROJECT_VERSION         = project.version() or "0.0.0",
-            PROJECT_VERSION_MAJOR   = semver.new(project.version() or "0.0.0"):major(),
-            PROJECT_VERSION_MINOR   = semver.new(project.version() or "0.0.0"):minor(),
-            PROJECT_VERSION_PATCH   = semver.new(project.version() or "0.0.0"):patch(),
-            OPTION_SIG_SCANNING     = configs.options.sig_scanning,
-            OPTION_ADDRESS_LIBRARY  = configs.options.address_library,
-            OPTION_NO_STRUCT_USE    = configs.options.no_struct_use,
-            OPTION_LAYOUT_DEPENDENT = configs.options.layout_dependent
+            PLUGIN_AUTHOR              = configs.author or "",
+            PLUGIN_DESCRIPTION         = configs.description or "",
+            PLUGIN_EMAIL               = configs.email or "",
+            PLUGIN_LICENSE             = (target:license() or "Unknown") .. " License",
+            PLUGIN_NAME                = configs.name or target:name(),
+            PLUGIN_VERSION             = target:version() or "0.0.0",
+            PLUGIN_VERSION_MAJOR       = semver.new(target:version() or "0.0.0"):major(),
+            PLUGIN_VERSION_MINOR       = semver.new(target:version() or "0.0.0"):minor(),
+            PLUGIN_VERSION_PATCH       = semver.new(target:version() or "0.0.0"):patch(),
+            PROJECT_NAME               = project.name() or "",
+            PROJECT_VERSION            = project.version() or "0.0.0",
+            PROJECT_VERSION_MAJOR      = semver.new(project.version() or "0.0.0"):major(),
+            PROJECT_VERSION_MINOR      = semver.new(project.version() or "0.0.0"):minor(),
+            PROJECT_VERSION_PATCH      = semver.new(project.version() or "0.0.0"):patch(),
+            COMPATIBLE_VERSIONS        = string.format("{%s}", table.concat(compatible_versions, ", ")),
+            OPTION_SIG_SCANNING        = configs.options.sig_scanning,
+            OPTION_ADDRESS_LIBRARY     = configs.options.address_library,
+            OPTION_NO_STRUCT_USE       = configs.options.no_struct_use,
+            OPTION_LAYOUT_DEPENDENT    = configs.options.layout_dependent
         }
 
         local config_parse = function(a_str)
